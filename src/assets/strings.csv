@@ -1,0 +1,117 @@
+KEY,English,PortugueseBR,SpanishLA
+MenuSubtitle,Connect matching colours. Fill every cell.,Ligue as cores iguais. Preencha cada célula.,Une los colores iguales. Llena cada celda.
+MenuNavLabel,GAME MENUS,MENUS DO JOGO,MENÚS DEL JUEGO
+MenuDailyRewards,DAILY SPARKS,FAÍSCAS DIÁRIAS,CHISPAS DIARIAS
+MenuDailyQuests,DAILY JOBS,TAREFAS DIÁRIAS,TAREAS DIARIAS
+MenuStats,RECORD,REGISTRO,REGISTRO
+MenuSettings,SETTINGS,OPÇÕES,AJUSTES
+ButtonPlay,PLAY,JOGAR,JUGAR
+ButtonBack,BACK,VOLTAR,ATRÁS
+ButtonDone,DONE,PRONTO,LISTO
+ButtonTest,TEST,TESTAR,PROBAR
+PlayerSummary,PLAYER SUMMARY,RESUMO DO JOGADOR,RESUMEN DEL JUGADOR
+LabelBest,BEST,MELHOR,MEJOR
+LabelDay,DAY,DIA,DÍA
+LoadingCopy,POWERING UP…,LIGANDO…,ENCENDIENDO…
+Paused,PAUSED,PAUSADO,EN PAUSA
+PausedEyebrow,THE BOARD WAITS,O TABULEIRO ESPERA,EL TABLERO ESPERA
+PausedResume,TAP TO RESUME,TOQUE PARA CONTINUAR,TOCA PARA CONTINUAR
+ResultsDoubled,DOUBLED,DOBRADO,DUPLICADO
+AdLoading,LOADING…,CARREGANDO…,CARGANDO…
+AdUnavailable,NO VIDEO AVAILABLE RIGHT NOW,NENHUM VÍDEO DISPONÍVEL AGORA,NINGÚN VIDEO DISPONIBLE AHORA
+PaletteSelect,SELECT,SELECIONAR,SELECCIONAR
+PaletteSelected,IN USE,EM USO,EN USO
+Owned,OWNED,ADQUIRIDO,ADQUIRIDO
+PurchaseWorking,OPENING CHECKOUT…,ABRINDO PAGAMENTO…,ABRIENDO PAGO…
+PurchaseConfirmed,UNLOCKED — THANK YOU,DESBLOQUEADO — OBRIGADO,DESBLOQUEADO — GRACIAS
+PurchaseCancelled,PURCHASE CANCELLED,COMPRA CANCELADA,COMPRA CANCELADA
+PurchaseFailed,PURCHASE DID NOT COMPLETE,A COMPRA NÃO FOI CONCLUÍDA,LA COMPRA NO SE COMPLETÓ
+PurchasePending,STILL CONFIRMING — WE WILL FINISH THIS NEXT TIME YOU OPEN THE GAME,AINDA CONFIRMANDO — TERMINAREMOS NA PRÓXIMA VEZ,AÚN CONFIRMANDO — LO TERMINAREMOS LA PRÓXIMA VEZ
+PurchaseUnavailable,NOT AVAILABLE RIGHT NOW,INDISPONÍVEL AGORA,NO DISPONIBLE AHORA
+KickerStats,YOUR BOARD,SEU TABULEIRO,TU TABLERO
+StatsBody,Everything you have connected so far.,Tudo o que você conectou até agora.,Todo lo que has conectado hasta ahora.
+KickerDailyRewards,RETURN LOOP,VOLTE SEMPRE,VUELVE PRONTO
+DailyRewardsBody,A handful of sparks for every day you come back.,Algumas faíscas por cada dia que você volta.,Unas chispas por cada día que vuelves.
+KickerDailyQuests,TODAY'S ORDER,PEDIDO DE HOJE,PEDIDO DE HOY
+DailyQuestsBody,Three jobs a day. They reset with the trusted clock.,Três tarefas por dia. Reiniciam com o relógio confiável.,Tres tareas al día. Se reinician con el reloj confiable.
+Claimed,CLAIMED,RECEBIDO,RECLAMADO
+ClaimedToday,CLAIMED TODAY,RECEBIDO HOJE,RECLAMADO HOY
+InProgress,IN PROGRESS,EM ANDAMENTO,EN PROGRESO
+Saving,SAVING…,SALVANDO…,GUARDANDO…
+LocalClaimNote,Local-browser claims persist for development but are never presented as RUN-authoritative.,"Recompensas locais persistem para desenvolvimento, mas nunca são apresentadas como oficiais da RUN.","Los reclamos locales persisten para desarrollo, pero nunca se presentan como oficiales de RUN."
+KickerSettings,COMFORT + ACCESS,CONFORTO + ACESSO,COMODIDAD + ACCESO
+SettingsMusic,AMBIENCE,AMBIENTE,AMBIENTE
+SettingsMusicVolume,AMBIENCE VOLUME,VOLUME DO AMBIENTE,VOLUMEN DEL AMBIENTE
+SettingsSfx,SOUND EFFECTS,EFEITOS SONOROS,EFECTOS DE SONIDO
+SettingsSfxVolume,EFFECTS VOLUME,VOLUME DOS EFEITOS,VOLUMEN DE EFECTOS
+SettingsHaptics,HAPTICS,VIBRAÇÃO,VIBRACIÓN
+SettingsReducedMotion,REDUCED MOTION,MOVIMENTO REDUZIDO,MOVIMIENTO REDUCIDO
+SettingsNotifications,REMINDERS,LEMBRETES,RECORDATORIOS
+SettingsLanguage,LANGUAGE,IDIOMA,IDIOMA
+SettingsQuality,EFFECTS DETAIL,DETALHE DOS EFEITOS,DETALLE DE EFECTOS
+SettingsLow,LOW,BAIXO,BAJO
+SettingsHigh,HIGH,ALTO,ALTO
+SettingsUnavailable,NOT SUPPORTED ON THIS DEVICE,NÃO SUPORTADO NESTE APARELHO,NO COMPATIBLE CON ESTE DISPOSITIVO
+ToggleOn,ON,LIGADO,ACTIVO
+ToggleOff,OFF,DESLIGADO,INACTIVO
+ToggleAsk,ASK,PERGUNTAR,PREGUNTAR
+NotificationFailed,REMINDER REQUEST FAILED,FALHA AO PEDIR LEMBRETE,FALLÓ LA SOLICITUD DE RECORDATORIO
+NotificationConsentNote,Reminder consent changes only after the RUN host confirms the requested state.,O consentimento muda apenas após a RUN confirmar o estado solicitado.,El consentimiento cambia solo tras la confirmación de RUN.
+HapticSent,HAPTIC SENT,VIBRAÇÃO ENVIADA,VIBRACIÓN ENVIADA
+HapticUnsupported,HAPTICS NEED A SUPPORTED DEVICE,A VIBRAÇÃO EXIGE UM APARELHO COMPATÍVEL,LA VIBRACIÓN REQUIERE UN DISPOSITIVO COMPATIBLE
+ActionHint,HINT,DICA,PISTA
+ActionHintFree,FREE,GRÁTIS,GRATIS
+ActionRestart,RESTART,REINICIAR,REINICIAR
+ActionUndo,UNDO,DESFAZER,DESHACER
+ButtonContinue,CONTINUE,CONTINUAR,CONTINUAR
+ClaimSparks,CLAIM [sparks] SPARKS,RECEBER [sparks] FAÍSCAS,RECLAMAR [sparks] CHISPAS
+DailyDone,SOLVED TODAY — BACK TOMORROW,RESOLVIDO HOJE — VOLTE AMANHÃ,RESUELTO HOY — VUELVE MAÑANA
+DailyEyebrow,TODAY'S BOARD,TABULEIRO DE HOJE,TABLERO DE HOY
+DailyFlow,DAILY FLOW,FLUXO DIÁRIO,FLUJO DIARIO
+DailyFresh,"A NEW BOARD FOR EVERYONE, TODAY","UM TABULEIRO NOVO PARA TODOS, HOJE","UN TABLERO NUEVO PARA TODOS, HOY"
+DailyWaiting,WAITING FOR TRUSTED TIME,AGUARDANDO HORA CONFIÁVEL,ESPERANDO HORA CONFIABLE
+HintTooPoor,A HINT COSTS [cost] SPARKS,UMA DICA CUSTA [cost] FAÍSCAS,UNA PISTA CUESTA [cost] CHISPAS
+KickerLevels,CHOOSE A BOARD,ESCOLHA UM TABULEIRO,ELIGE UN TABLERO
+KickerStudio,TUBES + SHOP,TUBOS + LOJA,TUBOS + TIENDA
+LabelFlows,FLOWS,FLUXOS,FLUJOS
+LabelMoves,MOVES,JOGADAS,JUGADAS
+LabelPar,PERFECT,PERFEITO,PERFECTO
+LabelPipe,FILLED,PREENCHIDO,LLENO
+LabelSolved,SOLVED,RESOLVIDOS,RESUELTOS
+LabelSparks,SPARKS,FAÍSCAS,CHISPAS
+LabelStreak,STREAK,SEQUÊNCIA,RACHA
+LevelEyebrow,LEVEL,NÍVEL,NIVEL
+LevelTileLabel,Level [level],Nível [level],Nivel [level]
+MenuLevels,LEVELS,NÍVEIS,NIVELES
+MenuStudio,STUDIO,ESTÚDIO,ESTUDIO
+NotEnoughSparks,NOT ENOUGH SPARKS YET,FAÍSCAS INSUFICIENTES,CHISPAS INSUFICIENTES
+PackSpark,SPARK,FAÍSCA,CHISPA
+PackCurrent,CURRENT,CORRENTE,CORRIENTE
+PackCircuit,CIRCUIT,CIRCUITO,CIRCUITO
+PackGrid,GRID,REDE,RED
+PackMainframe,MAINFRAME,MAINFRAME,MAINFRAME
+PackLockedNote,Solve [count] levels in [pack] to open this pack.,Resolva [count] níveis em [pack] para abrir este pacote.,Resuelve [count] niveles en [pack] para abrir este paquete.
+PackSolved,[solved] / [total] SOLVED,[solved] / [total] RESOLVIDOS,[solved] / [total] RESUELTOS
+PaletteUnlockSparks,UNLOCK · [cost],DESBLOQUEAR · [cost],DESBLOQUEAR · [cost]
+ResultsContinuePacks,BACK TO THE PACKS,VOLTAR AOS PACOTES,VOLVER A LOS PAQUETES
+ResultsDoubleSparks,WATCH · DOUBLE [sparks] SPARKS,ASSISTIR · DOBRAR [sparks] FAÍSCAS,VER · DUPLICAR [sparks] CHISPAS
+ResultsLevels,LEVEL LIST,LISTA DE NÍVEIS,LISTA DE NIVELES
+ResultsMenu,MAIN MENU,MENU PRINCIPAL,MENÚ PRINCIPAL
+ResultsNext,NEXT LEVEL,PRÓXIMO NÍVEL,SIGUIENTE NIVEL
+SolvedEyebrow,EVERY CELL LIT,TODAS AS CÉLULAS ACESAS,TODAS LAS CELDAS ENCENDIDAS
+SolvedNewBest,NEW BEST — FEWER MOVES,NOVO RECORDE — MENOS JOGADAS,NUEVO RÉCORD — MENOS JUGADAS
+SolvedPerfect,ONE STROKE PER FLOW,UM TRAÇO POR FLUXO,UN TRAZO POR FLUJO
+SolvedTitle,SOLVED,RESOLVIDO,RESUELTO
+SolvedTitlePerfect,PERFECT,PERFEITO,PERFECTO
+SolvedWithHint,SOLVED WITH A HINT,RESOLVIDO COM DICA,RESUELTO CON PISTA
+SparksGained,+[sparks] SPARKS,+[sparks] FAÍSCAS,+[sparks] CHISPAS
+StatBestStreak,BEST DAILY STREAK,MELHOR SEQUÊNCIA,MEJOR RACHA
+StatDailies,DAILY FLOWS,FLUXOS DIÁRIOS,FLUJOS DIARIOS
+StatHints,HINTS TAKEN,DICAS USADAS,PISTAS USADAS
+StatPerfects,PERFECTS,PERFEITOS,PERFECTOS
+StatSolved,LEVELS SOLVED,NÍVEIS RESOLVIDOS,NIVELES RESUELTOS
+StatsPacks,PACKS,PACOTES,PAQUETES
+StudioBody,Every tube set plays exactly the same. The light is the only thing that changes.,Todo conjunto de tubos joga igual. Só a luz muda.,Cada juego de tubos juega igual. Solo cambia la luz.
+StudioProducts,SHOP,LOJA,TIENDA
+StudioProductsBody,"Permanent unlocks, bought with Run Bits.","Desbloqueios permanentes, comprados com Run Bits.","Desbloqueos permanentes, comprados con Run Bits."
+StudioSafetyNote,"Ownership is read from RUN entitlements every session, never from this device.","A posse é lida das permissões da RUN a cada sessão, nunca deste aparelho.","La propiedad se lee de las licencias de RUN cada sesión, nunca de este dispositivo."

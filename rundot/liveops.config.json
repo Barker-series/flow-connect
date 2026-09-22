@@ -1,0 +1,50 @@
+{
+  "client": {
+    "values": {
+      "flowconnect_runtime": {
+        "dailyRewardsEnabled": true,
+        "dailyQuestsEnabled": true
+      },
+      "flowconnect_monetization": {
+        "enabled": true,
+        "purchasesEnabled": true,
+        "rewardedAdsEnabled": true,
+        "interstitialAdsEnabled": true,
+        "placements": {
+          "free_hint": {
+            "enabled": true,
+            "cooldownSeconds": 45,
+            "sessionCap": 4,
+            "dailyCap": 10,
+            "rewardMultiplier": 1
+          },
+          "double_sparks": {
+            "enabled": true,
+            "cooldownSeconds": 30,
+            "sessionCap": 4,
+            "dailyCap": 12,
+            "rewardMultiplier": 1
+          },
+          "between_levels": {
+            "enabled": true,
+            "cooldownSeconds": 120,
+            "sessionCap": 3,
+            "dailyCap": 6,
+            "rewardMultiplier": 1
+          }
+        },
+        "products": {
+          "tube_pack": { "enabled": true },
+          "ad_free": { "enabled": true },
+          "power_pass": { "enabled": true }
+        }
+      }
+    },
+    "overrides": [],
+    "experiments": []
+  },
+  "server": {
+    "values": {},
+    "overrides": []
+  }
+}

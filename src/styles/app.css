@@ -1,0 +1,2315 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   FLOW CONNECT — Neon Logic (DESIGN.md §8).
+
+   The DOM chrome is the dark around the tubes: deep navy surfaces, one cool
+   hairline, and neon only where something is live. The tubes on the board are
+   the brightest thing on screen; the UI never out-shines them.
+--------------------------------------------------------------------------- */
+
+@theme {
+    --color-primary: #2ff2ff;
+    --color-surface: #0f1326;
+    --text-sm: 0.9625rem;
+    --text-lg: 1.2375rem;
+    --text-2xl: 1.65rem;
+    --text-3xl: 2.0625rem;
+}
+
+:root {
+    /* One rounded geometric sans for everything, heavy for the wordmark and
+       the numbers. Neon signage is set in rounded sans; a serif reads as a
+       museum placard next to glowing tubes. */
+    font-family:
+        ui-rounded, "SF Pro Rounded", "Avenir Next", "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui,
+        sans-serif;
+    /* Semibold as the FLOOR. A 400-weight system sans is what makes a game
+       screen read as a preferences pane; every label in this genre is heavy. */
+    font-weight: 600;
+    --display:
+        ui-rounded, "SF Pro Rounded", "Avenir Next", "Segoe UI Variable Display", "Segoe UI", Roboto, system-ui,
+        sans-serif;
+    color-scheme: dark;
+
+    /* Neon — the house (Arcade) tubes, for UI accents only. */
+    --neon-red: #ff3b4e;
+    --neon-blue: #2f86ff;
+    --neon-green: #2fe06a;
+    --neon-yellow: #ffe03b;
+    --neon-orange: #ff8a1f;
+    --neon-cyan: #2ff2ff;
+    --neon-pink: #ff4fd8;
+    --neon-violet: #9d6bff;
+
+    /* Aliases the shared rules below are written against. */
+    --amber: var(--neon-yellow);
+    --cobalt: var(--neon-blue);
+    --viridian: var(--neon-green);
+    --rose: var(--neon-pink);
+    --plum: var(--neon-violet);
+    --ruby: var(--neon-red);
+
+    /* The dark — cool and deep, so the tubes are the only bright thing. */
+    --oak: #1d2340;
+    --oak-dark: #0d1022;
+    --oak-deep: #070912;
+    --came: #2c3563;
+    --pewter: #8f9cd0;
+    --lamp: #f4fbff;
+    --chalk: #e8ecff;
+    --chalk-dim: #8e98c2;
+
+    /* ---------------------------------------------------------------------
+       Surfaces.
+
+       One rule: a surface is a VALUE, never a material. No gradient bodies, no
+       1px warm rims, no inset top highlights, no drop shadows. Those four
+       together are the vocabulary that reads as a 2010s mobile game, and they
+       were on every card in here. Depth now comes from three steps of
+       translucent white over the backdrop, so the palette still tints every
+       surface and the tubes stay the only saturated thing on screen.
+    --------------------------------------------------------------------- */
+    --surface-1: rgba(150, 175, 255, 0.1);
+    --surface-2: rgba(150, 175, 255, 0.16);
+    --surface-3: rgba(150, 175, 255, 0.24);
+    --hairline: rgba(170, 195, 255, 0.16);
+    /* The chunky bottom edge every raised thing sits on. This IS the genre:
+       one light from above, one side wall below, and a soft contact shadow. A
+       flat card reads as a wireframe next to it. */
+    --edge: 0 4px 0 rgba(0, 0, 0, 0.32);
+    --edge-sm: 0 3px 0 rgba(0, 0, 0, 0.3);
+    --lift: 0 6px 14px rgba(0, 0, 0, 0.3);
+    --scrim: rgba(6, 8, 18, 0.74);
+    --radius: 18px;
+    --radius-sm: 14px;
+
+    --panel: rgba(12, 15, 32, 0.9);
+    --panel-rim: transparent;
+}
+
+button,
+select,
+input {
+    font: inherit;
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+    outline: 3px solid var(--lamp);
+    outline-offset: 3px;
+}
+
+/* ---------------------------------------------------------------------------
+   Viewport + playable frame. Portrait is primary; landscape is a first-class
+   layout rather than a squeezed portrait column. The backdrops are composed at
+   boot from the game's own board art (see assets/preload.ts) and published as
+   custom properties — the flat stage colour is the fallback if that fails.
+--------------------------------------------------------------------------- */
+
+:root {
+    /* One design unit, in CSS px — the mirror of stage.ts MAX_UNIT_PX. The cap
+       is what makes a desktop window render the game at its designed size
+       instead of at whatever size the window happens to be. Capping the FRAME
+       instead is what left dark bands: the canvas paints the stage, so the
+       stage stopped where the frame did. */
+    --u: min(calc(100vw / 720), 0.85px);
+    --box-w: calc(720 * var(--u));
+    --box-h: 100dvh;
+    --box-x: calc((100vw - var(--box-w)) / 2);
+    --box-y: 0px;
+    --scene-backdrop-portrait: none;
+    --scene-backdrop-wide: none;
+    --scene-backdrop: var(--scene-backdrop-portrait);
+    /* Portrait reserves, mirrored from scene/layout.ts (HUD_RESERVE = 206,
+       BAR_RESERVE = 150). Change one, change the other. */
+    --hud-reserve: calc(250 * var(--u));
+    --bar-reserve: calc(150 * var(--u));
+    /* Inset chain per edge: an attached RUN host publishes authoritative
+       values inline (see applyRunSafeArea); a ViewDeck preview exposes its
+       device insets as --viewdeck-safe-area-inset-*; the browser's own env()
+       is the final fallback. */
+    --safe-top: var(--viewdeck-safe-area-inset-top, env(safe-area-inset-top, 0px));
+    --safe-right: var(--viewdeck-safe-area-inset-right, env(safe-area-inset-right, 0px));
+    --safe-bottom: var(--viewdeck-safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
+    --safe-left: var(--viewdeck-safe-area-inset-left, env(safe-area-inset-left, 0px));
+}
+
+@media (orientation: landscape) {
+    /* Accommodates modern 19.5:9–20:9 phones without stretching indefinitely
+       on ultrawide desktop windows. Decorative side art fills any remainder. */
+    :root {
+        --u: min(calc(100dvh / 720), 0.85px);
+        --box-h: calc(720 * var(--u));
+        --box-w: min(100vw, calc(var(--box-h) * 2.2));
+        --box-x: calc((100vw - var(--box-w)) / 2);
+        --box-y: calc((100dvh - var(--box-h)) / 2);
+        --scene-backdrop: var(--scene-backdrop-wide);
+
+        /* The right-hand rail, mirrored from scene/layout.ts
+           (RAIL_WIDTH_LANDSCAPE = 380). The landscape design scale is
+           viewport-height / 720, so a design unit is `var(--u)`. The scene
+           keeps the board clear of the rail, so this is what stops the DOM
+           landing on the tubes — it is not decorative padding. */
+        --rail-width: calc(380 * var(--u));
+    }
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body,
+body * {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+body {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    background: var(--oak-deep);
+    font-size: 17.5px;
+    touch-action: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Full-viewport backdrop, deliberately separate from the playable frame so
+   desktop side areas show intentional game art rather than empty app chrome. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-color: var(--oak-dark);
+    background-image:
+        linear-gradient(
+            180deg,
+            rgba(8, 10, 24, 0.7) 0%,
+            rgba(8, 10, 24, 0.34) 32%,
+            rgba(8, 10, 24, 0.4) 62%,
+            rgba(8, 10, 24, 0.76) 100%
+        ),
+        var(--scene-backdrop);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover, cover;
+}
+
+#root {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+}
+
+#app-frame {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    /* Everything in the scene scales off the SHORT edge (see stage.ts), so an
+       uncapped frame on a desktop window makes a phone game enormous: a 830px
+       window put the board's cells at 127px and the carried cut at a third of
+       the screen. Capping the short edge holds the game at its design size and
+       lets the backdrop fill the rest, which is what the frame is for. */
+    height: 100dvh;
+    overflow: hidden;
+    color: var(--chalk);
+    /* The backdrop is the game's own board art, composed at boot. It is atmosphere,
+       not a subject, so it carries a scrim — but only enough to hold text. A
+       heavy one drops the menu to near-black while the bench is lit, and the
+       two screens then look like different games. */
+    background-color: var(--oak-dark);
+    background-image:
+        linear-gradient(
+            180deg,
+            rgba(8, 10, 24, 0.72) 0%,
+            rgba(8, 10, 24, 0.34) 32%,
+            rgba(8, 10, 24, 0.4) 62%,
+            rgba(8, 10, 24, 0.78) 100%
+        ),
+        var(--scene-backdrop);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover, cover;
+}
+
+/* Safe-area utilities consume either browser fallbacks or RUN host values. */
+@utility pt-safe-top {
+    padding-top: calc(0.5rem + var(--safe-top));
+}
+@utility pb-safe-bottom {
+    padding-bottom: calc(0.5rem + var(--safe-bottom));
+}
+
+/* --------------------------------------------------------------------------
+   Shared workshop surfaces
+--------------------------------------------------------------------------- */
+
+.menu-shell,
+.subscreen {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    min-height: 100%;
+    flex-direction: column;
+    overflow: hidden;
+    padding-right: max(clamp(18px, 6vw, 38px), var(--safe-right));
+    padding-left: max(clamp(18px, 6vw, 38px), var(--safe-left));
+}
+
+.menu-shell {
+    justify-content: flex-start;
+    gap: 14px;
+}
+
+/* The header stays up with the rose; everything from the player strip down is
+   anchored to the bottom safe area. Centring the whole stack instead left a
+   void of bare bench under the build stamp on tall phones, which read as a
+   broken screen rather than as atmosphere. The gap lands in the middle, where
+   the backdrop's bench and stain actually are. */
+
+.menu-header {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+/* The backdrop is deliberately busy behind the title — it is the game's own
+   board. This scrim is what lets it stay busy: the wordmark carries its own
+   contrast instead of the art having to be dimmed everywhere to suit it. */
+.menu-header::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    top: -18%;
+    right: -14%;
+    bottom: -14%;
+    left: -14%;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(5, 6, 16, 0.82) 0%,
+        rgba(5, 6, 16, 0.55) 45%,
+        rgba(5, 6, 16, 0) 72%
+    );
+    pointer-events: none;
+}
+
+.eyebrow {
+    margin: 0;
+    color: var(--chalk-dim);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* On the menu the eyebrow sits between two hairline rules, like a bench mark
+   stamped over the studio door. Everywhere else it stays plain. */
+.menu-header .eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+.menu-header .eyebrow::before,
+.menu-header .eyebrow::after {
+    content: "";
+    width: 34px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(47, 242, 255, 0.6));
+}
+.menu-header .eyebrow::after {
+    transform: scaleX(-1);
+}
+
+/* The wordmark is two neon signs: FLOW in the house cyan, CONNECT in pink,
+   each a white-hot core with a coloured bloom. Built from text-shadow only, so
+   it stays sharp at every size and costs no image. */
+.menu-logo h1 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 10px 0 0;
+    font-family: var(--display);
+    font-weight: 900;
+    line-height: 0.92;
+    letter-spacing: 0.06em;
+}
+.logo-flow,
+.logo-connect {
+    color: #fbfdff;
+}
+.logo-flow {
+    font-size: clamp(56px, 20vw, 96px);
+    text-shadow:
+        0 0 4px #fff,
+        0 0 14px var(--neon-cyan),
+        0 0 32px var(--neon-cyan),
+        0 0 64px rgba(47, 242, 255, 0.55);
+}
+.logo-connect {
+    font-size: clamp(26px, 9.2vw, 44px);
+    letter-spacing: 0.22em;
+    margin-right: -0.22em;
+    text-shadow:
+        0 0 3px #fff,
+        0 0 12px var(--neon-pink),
+        0 0 28px var(--neon-pink),
+        0 0 54px rgba(255, 79, 216, 0.5);
+}
+
+.menu-subtitle {
+    margin: 14px 0 0;
+    color: var(--chalk);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    opacity: 0.86;
+}
+
+.player-strip {
+    display: flex;
+    /* Anchors the control stack to the bottom (see the note at .menu-shell). */
+    margin-top: auto;
+    min-height: 52px;
+    align-items: center;
+    justify-content: space-between;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    padding: 8px 14px;
+    box-shadow: var(--edge), var(--lift);
+}
+
+.player-best,
+.player-currency {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.player-best span {
+    color: var(--chalk-dim);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+}
+
+.player-best strong,
+.player-currency strong {
+    color: var(--lamp);
+    font-size: 20px;
+    font-weight: 800;
+}
+
+/* The spark: a four-point star, the same shape the board throws on a
+   connect. Not an emoji — an emoji renders differently on every device. */
+.spark-glyph {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    flex: none;
+    background: radial-gradient(circle, #fff 0 18%, var(--neon-yellow) 40%, #ff9d1f 100%);
+    clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
+    filter: drop-shadow(0 0 4px rgba(255, 224, 59, 0.8));
+}
+.spark-glyph.small {
+    width: 13px;
+    height: 13px;
+}
+
+.play-button {
+    position: relative;
+    display: flex;
+    min-height: 66px;
+    align-items: center;
+    justify-content: space-between;
+    overflow: hidden;
+    border: none;
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, #6af7ff 0%, var(--neon-cyan) 55%, #13c9d8 100%);
+    padding: 0 14px 0 22px;
+    color: #03222a;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    box-shadow:
+        0 4px 0 #0a8c98,
+        0 0 26px rgba(47, 242, 255, 0.45);
+    transition:
+        transform 120ms ease,
+        filter 120ms ease;
+}
+/* The button is a lit neon panel; it presses down rather than lighting up.
+   Killed with every other animation under reduced motion. */
+.play-button:active {
+    transform: translateY(2px);
+    filter: brightness(0.94);
+}
+.play-glyph {
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: none;
+    border-radius: 999px;
+    background: rgba(3, 34, 42, 0.16);
+}
+.play-glyph svg {
+    width: 22px;
+    fill: #03323d;
+}
+.play-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    line-height: 1.1;
+}
+.play-copy small {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    opacity: 0.72;
+}
+
+/* The Daily Flow: the one board everyone shares today, with the streak as its
+   own lit badge so a live streak is visible from the menu. */
+.daily-button {
+    display: flex;
+    min-height: 58px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border: 1px solid rgba(255, 79, 216, 0.45);
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, rgba(255, 79, 216, 0.18), rgba(157, 107, 255, 0.12));
+    padding: 6px 10px 6px 20px;
+    color: var(--chalk);
+    text-align: left;
+    box-shadow:
+        var(--edge),
+        0 0 22px rgba(255, 79, 216, 0.18);
+}
+.daily-button.done {
+    border-color: var(--hairline);
+    background: var(--surface-1);
+    box-shadow: var(--edge);
+}
+.daily-button:active {
+    transform: translateY(2px);
+}
+.daily-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.daily-copy > span {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+.daily-copy small {
+    color: var(--chalk-dim);
+    font-size: 10.5px;
+    letter-spacing: 0.08em;
+}
+.daily-streak {
+    display: flex;
+    min-width: 58px;
+    flex-direction: column;
+    align-items: center;
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.28);
+    padding: 5px 8px;
+}
+.daily-streak strong {
+    font-size: 20px;
+    font-weight: 900;
+    line-height: 1;
+    color: var(--chalk-dim);
+}
+.daily-streak.lit strong {
+    color: #fff;
+    text-shadow: 0 0 10px var(--neon-orange);
+}
+.daily-streak small {
+    color: var(--chalk-dim);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.menu-tile {
+    display: flex;
+    min-height: 64px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    padding: 8px 6px;
+    color: var(--chalk);
+    text-align: center;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    transition:
+        transform 110ms ease,
+        box-shadow 110ms ease;
+}
+.menu-tile:active {
+    transform: translateY(2px);
+}
+
+/* The icon is a mark, not a badge.
+
+   It used to be a 40px coloured badge, filled with a per-tile
+   gradient — five saturated colours competing with each other and with the
+   actual tubes on the board. One weight, one colour, no container: the tile's
+   meaning comes from its label, and the palette belongs to the game. */
+.menu-icon {
+    display: grid;
+    width: 26px;
+    height: 26px;
+    place-items: center;
+    flex: none;
+    color: var(--chalk-dim);
+}
+.menu-icon svg {
+    width: 24px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* The gear is the one solid mark among stroked outlines — see GearIcon. Its
+   stroke is not an outline, it is what rounds the eight tooth corners. The
+   `svg` qualifier is load-bearing: `.menu-icon svg` sets `fill: none` at the
+   same specificity, and unqualified this rule loses to it and the gear renders
+   as a hollow ring. */
+svg.gear-icon {
+    fill: currentcolor;
+    fill-rule: evenodd;
+    stroke-width: 1.5;
+    stroke-linejoin: round;
+}
+
+.build-stamp {
+    margin: 0;
+    color: var(--chalk-dim);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-align: center;
+    opacity: 0.6;
+}
+
+/* --------------------------------------------------------------------------
+   Sub-screens
+--------------------------------------------------------------------------- */
+
+.subscreen {
+    height: 100%;
+    min-height: 0;
+    padding-top: max(16px, var(--safe-top));
+}
+.subscreen-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 2px 12px;
+}
+.subscreen-header h2 {
+    margin: 3px 0 0;
+    font-family: var(--display);
+    color: var(--lamp);
+    font-size: clamp(26px, 8.4vw, 40px);
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.06em;
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.5);
+}
+.back-button {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    place-items: center;
+    flex: none;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--lamp);
+    box-shadow: var(--edge), var(--lift);
+}
+.back-button svg {
+    width: 24px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.back-button:active {
+    transform: translateY(2px);
+}
+.subscreen-content {
+    min-height: 0;
+    flex: 1;
+    overflow-x: hidden;
+    overflow-y: auto;
+    border-top: 1px solid var(--panel-rim);
+    /* Opaque enough that the backdrop's tubes never compete with body text,
+       translucent enough that the bench still reads behind the frame. */
+    background: var(--scrim);
+    padding: 18px 16px max(30px, var(--safe-bottom));
+    overscroll-behavior: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+}
+.subscreen-end {
+    display: block;
+    width: 1px;
+    height: 1px;
+}
+.screen-copy {
+    margin: 0 0 18px;
+    color: var(--chalk);
+    font-size: 15px;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+.screen-copy.small {
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+.section-heading {
+    margin: 26px 0 8px;
+    color: var(--lamp);
+    font-size: 15px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--panel-rim);
+    padding-bottom: 6px;
+}
+.safety-note {
+    margin-top: 18px;
+    color: var(--chalk-dim);
+    font-size: 12px;
+    line-height: 1.5;
+}
+.authority-label {
+    color: var(--neon-cyan);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    margin-bottom: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   Levels
+--------------------------------------------------------------------------- */
+
+.pack-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    margin: 0 -4px 12px;
+    padding: 2px 4px 6px;
+    scrollbar-width: none;
+    touch-action: pan-x;
+}
+.pack-tab {
+    display: flex;
+    min-width: 104px;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    border: 1px solid var(--hairline);
+    border-bottom: 3px solid var(--pack-accent, var(--neon-cyan));
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    padding: 8px 12px;
+    color: var(--chalk);
+}
+.pack-tab strong {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+}
+.pack-tab small {
+    color: var(--chalk-dim);
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+}
+.pack-tab.active {
+    background: var(--surface-3);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--pack-accent, #2ff2ff) 35%, transparent);
+}
+.pack-tab.locked {
+    opacity: 0.55;
+}
+.pack-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    color: var(--chalk-dim);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+.pack-perfects {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--neon-yellow);
+}
+.pack-perfects svg,
+.level-star svg {
+    width: 15px;
+    fill: currentcolor;
+}
+.pack-locked-note {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    border: 1px dashed var(--hairline);
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    color: var(--chalk-dim);
+    font-size: 13px;
+    line-height: 1.4;
+}
+.pack-locked-note svg,
+.level-lock svg {
+    width: 20px;
+    flex: none;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+.level-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+}
+.level-tile {
+    position: relative;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--oak-dark);
+    padding: 0;
+}
+.level-tile img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    opacity: 0.55;
+    transition: opacity 160ms ease;
+}
+.level-tile.solved img {
+    opacity: 1;
+}
+.level-tile.perfect {
+    border-color: rgba(255, 224, 59, 0.6);
+}
+.level-tile:active:not(:disabled) {
+    transform: scale(0.96);
+}
+.level-number {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font-size: 20px;
+    font-weight: 900;
+    text-shadow:
+        0 0 6px rgba(0, 0, 0, 0.9),
+        0 2px 0 rgba(0, 0, 0, 0.7);
+}
+.level-tile.solved .level-number {
+    top: auto;
+    bottom: 3px;
+    left: 5px;
+    transform: none;
+    font-size: 12px;
+}
+.level-star {
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    color: var(--neon-yellow);
+    filter: drop-shadow(0 0 4px rgba(255, 224, 59, 0.8));
+}
+.level-lock {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background: rgba(4, 5, 14, 0.62);
+    color: var(--chalk-dim);
+}
+.level-tile:disabled {
+    opacity: 1;
+}
+.level-tile:disabled .level-number {
+    display: none;
+}
+
+.pack-progress {
+    display: grid;
+    gap: 10px;
+}
+.pack-progress > div {
+    display: grid;
+    grid-template-columns: 130px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+.pack-progress small {
+    color: var(--chalk-dim);
+    font-weight: 700;
+}
+.pack-progress progress {
+    width: 100%;
+    height: 6px;
+    accent-color: var(--neon-cyan);
+}
+
+/* --------------------------------------------------------------------------
+   Studio
+--------------------------------------------------------------------------- */
+
+.palette-list {
+    display: grid;
+    gap: 10px;
+}
+.palette-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    padding: 12px;
+    box-shadow: var(--edge), var(--lift);
+}
+.palette-card.active {
+    border-color: var(--neon-cyan);
+    background: var(--surface-2);
+    box-shadow:
+        var(--edge),
+        0 0 18px rgba(47, 242, 255, 0.2);
+}
+.palette-board {
+    width: 92px;
+    height: 92px;
+    flex: none;
+    border-radius: 10px;
+}
+.palette-swatch {
+    display: block;
+    width: 120px;
+    height: 42px;
+    margin-top: 8px;
+    border-radius: 8px;
+}
+.palette-copy h3 {
+    margin: 0;
+    color: var(--lamp);
+    font-size: 16px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+}
+.palette-copy p {
+    margin: 4px 0 0;
+    color: var(--chalk-dim);
+    font-size: 12.5px;
+    line-height: 1.4;
+}
+.palette-action,
+.palette-locked {
+    display: flex;
+    grid-column: 1 / -1;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--chalk);
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+.palette-action.active {
+    border-color: var(--neon-cyan);
+    color: var(--neon-cyan);
+}
+.palette-locked {
+    color: var(--chalk-dim);
+    font-size: 11px;
+}
+
+.shop-card {
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--neon-pink);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    padding: 14px;
+    box-shadow: var(--edge), var(--lift);
+}
+.shop-card + .shop-card {
+    margin-top: 10px;
+}
+.shop-card h3 {
+    margin: 5px 0;
+    color: var(--lamp);
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+}
+.shop-card p:not(.eyebrow) {
+    margin: 0;
+    color: var(--chalk);
+    font-size: 13.5px;
+    line-height: 1.45;
+}
+.shop-card button {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 12px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(180deg, #ff86e6 0%, var(--neon-pink) 60%, #d62fb5 100%);
+    color: #2a0322;
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    box-shadow: 0 3px 0 #8f1d79;
+}
+.shop-card button:disabled {
+    background: var(--surface-2);
+    color: var(--chalk-dim);
+    box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+   Daily, quests, stats, settings
+--------------------------------------------------------------------------- */
+
+.reward-track {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+.reward-day {
+    display: flex;
+    min-height: 88px;
+    flex-direction: column;
+    justify-content: center;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    padding: 12px;
+    box-shadow: var(--edge), var(--lift);
+}
+.reward-day:last-child {
+    grid-column: 1 / -1;
+    border-color: rgba(255, 224, 59, 0.55);
+}
+.reward-day.current {
+    outline: 2px solid var(--viridian);
+    outline-offset: -3px;
+}
+.reward-day span,
+.reward-day small {
+    color: var(--chalk-dim);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+}
+.reward-day strong {
+    color: var(--lamp);
+    font-size: 28px;
+    font-weight: 900;
+}
+.claim-action {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 14px;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    background: var(--viridian);
+    color: #032410;
+    font-size: 14px;
+    letter-spacing: 0.08em;
+}
+.claim-action:disabled {
+    border-color: var(--panel-rim);
+    background: var(--surface-1);
+    color: var(--chalk-dim);
+}
+
+.quest-list,
+.settings-list {
+    display: grid;
+    gap: 10px;
+}
+.quest-card {
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--viridian);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    padding: 14px;
+    box-shadow: var(--edge), var(--lift);
+}
+.quest-card div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+.quest-card progress {
+    width: 100%;
+    height: 6px;
+    margin-top: 12px;
+    accent-color: var(--viridian);
+}
+.quest-card button {
+    min-width: 96px;
+    min-height: 44px;
+    margin-top: 10px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--chalk);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 9px;
+}
+.stats-grid article {
+    display: flex;
+    min-height: 100px;
+    flex-direction: column;
+    justify-content: space-between;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    padding: 14px;
+    box-shadow: var(--edge), var(--lift);
+}
+.stats-grid span {
+    color: var(--chalk-dim);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+}
+.stats-grid strong {
+    color: var(--lamp);
+    font-size: 30px;
+    font-weight: 900;
+}
+
+.setting-row,
+.setting-slider {
+    display: flex;
+    min-height: 56px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-bottom: 1px solid var(--hairline);
+}
+.setting-row > span,
+.setting-slider > span {
+    font-size: 13px;
+    letter-spacing: 0.08em;
+}
+.setting-row input[type="checkbox"],
+.setting-actions input[type="checkbox"] {
+    width: 46px;
+    height: 26px;
+    accent-color: var(--viridian);
+}
+.setting-slider {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 10px 0;
+}
+.setting-slider input {
+    width: 100%;
+    accent-color: var(--amber);
+}
+.setting-row button,
+.setting-row select {
+    min-height: 44px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    padding: 0 12px;
+    color: var(--chalk);
+}
+.setting-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.segmented {
+    display: flex;
+    gap: 6px;
+}
+.segmented button.active {
+    border-color: var(--amber);
+    color: var(--amber);
+}
+
+/* --------------------------------------------------------------------------
+   In-level HUD
+
+   Portrait: header + stats strip inside --hud-reserve at the top, the action
+   bar inside --bar-reserve at the bottom. Landscape: both stack in the right
+   rail. The scene leaves exactly these reserves free, so nothing here may
+   outgrow them — every cluster is pinned to its reserve, not sized by content.
+--------------------------------------------------------------------------- */
+
+.game-hud {
+    position: absolute;
+    top: 0;
+    right: max(14px, var(--safe-right));
+    left: max(14px, var(--safe-left));
+    display: flex;
+    height: calc(var(--hud-reserve) + var(--safe-top));
+    flex-direction: column;
+    justify-content: center;
+    gap: 6px;
+    padding-top: var(--safe-top);
+    margin-inline: auto;
+    max-width: calc(var(--box-w) - 28px);
+}
+/* While a finger is drawing, the chrome steps back so the board owns the eye. */
+.drawing .game-hud,
+.drawing .action-bar {
+    opacity: 0.35;
+    transition: opacity 120ms ease-out;
+}
+.game-hud,
+.action-bar {
+    transition: opacity 220ms ease-out 80ms;
+}
+.hud-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.hud-back,
+.hud-settings,
+.hud-sparks {
+    display: grid;
+    min-width: 44px;
+    height: 44px;
+    place-items: center;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    color: var(--chalk);
+    backdrop-filter: blur(3px);
+    box-shadow: var(--edge);
+}
+.hud-back svg {
+    width: 22px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.hud-settings svg {
+    width: 21px;
+    stroke: currentcolor;
+}
+.hud-back:active,
+.hud-settings:active {
+    transform: translateY(2px);
+}
+.hud-sparks {
+    display: flex;
+    gap: 7px;
+    padding: 0 12px;
+    color: var(--lamp);
+    font-size: 16px;
+    font-weight: 800;
+}
+.hud-title {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+}
+.hud-title strong {
+    overflow: hidden;
+    max-width: 100%;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #fff;
+    text-shadow: 0 0 14px rgba(47, 242, 255, 0.45);
+}
+.hud-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0;
+}
+.hud-stats > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-1);
+    padding: 4px 4px 5px;
+}
+.hud-stats dt {
+    color: var(--chalk-dim);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+}
+.hud-stats dd {
+    margin: 1px 0 0;
+    color: var(--lamp);
+    font-size: 19px;
+    font-weight: 800;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+.hud-stats dd small {
+    color: var(--chalk-dim);
+    font-size: 12px;
+    font-weight: 700;
+}
+.pipe-meter {
+    overflow: hidden;
+    height: 5px;
+    border-radius: 99px;
+    background: rgba(150, 175, 255, 0.12);
+}
+.pipe-meter span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(
+        90deg,
+        var(--neon-red),
+        var(--neon-orange),
+        var(--neon-yellow),
+        var(--neon-green),
+        var(--neon-cyan),
+        var(--neon-blue),
+        var(--neon-violet)
+    );
+    box-shadow: 0 0 10px rgba(47, 242, 255, 0.6);
+    transition: width 220ms ease-out;
+}
+
+.action-bar {
+    position: absolute;
+    right: max(14px, var(--safe-right));
+    bottom: 0;
+    left: max(14px, var(--safe-left));
+    display: flex;
+    height: calc(var(--bar-reserve) + var(--safe-bottom));
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding-bottom: var(--safe-bottom);
+    margin-inline: auto;
+    max-width: calc(var(--box-w) - 28px);
+}
+.action-button {
+    position: relative;
+    display: flex;
+    min-height: 64px;
+    max-width: 150px;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius);
+    background: var(--surface-1);
+    color: var(--chalk);
+    backdrop-filter: blur(3px);
+    box-shadow: var(--edge), var(--lift);
+}
+.action-button:active:not(:disabled) {
+    transform: translateY(2px);
+}
+.action-button.accent {
+    border-color: rgba(255, 224, 59, 0.5);
+    background: linear-gradient(180deg, rgba(255, 224, 59, 0.2), rgba(255, 138, 31, 0.12));
+    box-shadow:
+        var(--edge),
+        0 0 18px rgba(255, 224, 59, 0.16);
+}
+.action-icon svg {
+    width: 24px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2.2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+.action-label {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+}
+.action-badge {
+    position: absolute;
+    top: -8px;
+    right: -6px;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    border-radius: 99px;
+    background: #1a1f3a;
+    border: 1px solid rgba(255, 224, 59, 0.55);
+    padding: 2px 7px;
+    color: var(--neon-yellow);
+    font-size: 11px;
+    font-weight: 800;
+}
+.action-badge.short {
+    border-color: rgba(255, 59, 78, 0.6);
+    color: #ff8a95;
+}
+.action-badge.free {
+    border-color: rgba(47, 134, 255, 0.8);
+    background: var(--neon-blue);
+    color: #fff;
+    letter-spacing: 0.08em;
+}
+
+/* The in-level settings card borrows the modal shell but lists rows, not prose. */
+.settings-card h2 {
+    margin-bottom: 16px;
+    font-size: 30px;
+}
+.settings-card .settings-list {
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+@media (orientation: landscape) {
+    .game-hud,
+    .action-bar {
+        right: calc(var(--box-x) + max(calc(22 * var(--u)), var(--safe-right)));
+        left: auto;
+        width: var(--rail-width);
+        max-width: none;
+        margin: 0;
+    }
+    .run-card.solved-sheet {
+        align-items: center;
+    }
+    /* The complete card takes over the rail; the HUD it replaces steps out
+       rather than showing through behind it. */
+    .complete .game-hud {
+        opacity: 0;
+        visibility: hidden;
+    }
+    .game-hud {
+        top: var(--box-y);
+        height: auto;
+        padding-top: max(14px, var(--safe-top));
+        justify-content: flex-start;
+    }
+    .action-bar {
+        bottom: var(--box-y);
+        height: auto;
+        padding-bottom: max(14px, var(--safe-bottom));
+    }
+    /* The rail is narrow: the level name gets its own row above the controls,
+       or a long pack name is truncated to "CI…". */
+    .hud-top {
+        flex-wrap: wrap;
+    }
+    .hud-title {
+        order: -1;
+        flex-basis: 100%;
+        align-items: flex-start;
+    }
+    .hud-back {
+        margin-right: auto;
+    }
+    .hud-title strong {
+        font-size: max(17px, calc(24 * var(--u)));
+    }
+    .hud-stats dd {
+        font-size: max(18px, calc(24 * var(--u)));
+    }
+    .action-button {
+        min-height: max(58px, calc(90 * var(--u)));
+        max-width: none;
+    }
+}
+
+/* Modal cards: level complete and in-level settings. */
+.run-card {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 24px max(20px, var(--safe-right)) max(24px, var(--safe-bottom)) max(20px, var(--safe-left));
+    background: rgba(4, 5, 14, 0.66);
+    backdrop-filter: blur(4px);
+    animation: card-in 220ms ease-out;
+}
+.run-card-body {
+    width: min(100%, 380px);
+    max-height: 100%;
+    overflow-y: auto;
+    border: 1px solid rgba(170, 195, 255, 0.22);
+    border-radius: var(--radius);
+    background: rgba(13, 16, 36, 0.96);
+    padding: 22px 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    text-align: center;
+    overscroll-behavior: contain;
+}
+.run-card-body h2 {
+    margin: 6px 0 6px;
+    font-family: var(--display);
+    color: #fff;
+    font-size: 44px;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-shadow:
+        0 0 12px var(--neon-cyan),
+        0 0 30px rgba(47, 242, 255, 0.5);
+}
+/* The solved board is the reward, so the complete card never hides it: a
+   light scrim, no blur, and the card docks at the bottom (portrait) or over
+   the rail (landscape) — the lit board stays in full view above/beside it. */
+.run-card.solved-sheet {
+    align-items: end;
+    background: linear-gradient(180deg, rgba(4, 5, 14, 0) 0%, rgba(4, 5, 14, 0.2) 45%, rgba(4, 5, 14, 0.78) 100%);
+    backdrop-filter: none;
+    animation: sheet-in 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+.solved-sheet .run-card-body {
+    width: min(100%, 420px);
+    padding: 16px 16px 14px;
+}
+.solved-sheet .run-card-body h2 {
+    font-size: 36px;
+}
+.solved-sheet .solved-level {
+    margin-bottom: 10px;
+}
+.solved-sheet .results-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.solved-sheet .results-grid div {
+    padding: 7px 4px;
+}
+.solved-sheet .results-grid dd {
+    font-size: 19px;
+}
+@keyframes sheet-in {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+@media (orientation: landscape) {
+    .run-card.solved-sheet {
+        align-items: center;
+        justify-items: end;
+        padding-right: calc(var(--box-x) + max(calc(22 * var(--u)), var(--safe-right)));
+        background: linear-gradient(90deg, rgba(4, 5, 14, 0) 40%, rgba(4, 5, 14, 0.7) 100%);
+    }
+    .solved-sheet .run-card-body {
+        width: var(--rail-width);
+    }
+    .solved-sheet .results-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.solved-card.perfect h2 {
+    text-shadow:
+        0 0 12px var(--neon-yellow),
+        0 0 30px rgba(255, 224, 59, 0.55);
+}
+.solved-card.perfect {
+    border-color: rgba(255, 224, 59, 0.5);
+}
+.solved-level {
+    margin: 0 0 16px;
+    color: var(--chalk-dim);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+}
+.run-card-copy {
+    margin: 0 0 16px;
+    color: var(--chalk);
+    font-size: 14px;
+    line-height: 1.45;
+}
+.results-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin: 0 0 16px;
+}
+.results-grid div {
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: rgba(6, 8, 20, 0.6);
+    padding: 10px 8px;
+}
+.results-grid dt {
+    color: var(--chalk-dim);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+}
+.results-grid dd {
+    margin: 4px 0 0;
+    color: var(--lamp);
+    font-size: 22px;
+    font-weight: 800;
+}
+.results-grid .doubled {
+    color: var(--viridian);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+}
+
+.card-action {
+    display: block;
+    width: 100%;
+    min-height: 50px;
+    margin-top: 9px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--chalk);
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    box-shadow: var(--edge), var(--lift);
+}
+.card-action.primary {
+    border-color: transparent;
+    background: linear-gradient(180deg, #6af7ff 0%, var(--neon-cyan) 55%, #13c9d8 100%);
+    color: #03222a;
+    box-shadow:
+        0 4px 0 #0a8c98,
+        0 0 20px rgba(47, 242, 255, 0.35);
+}
+.card-action.rewarded {
+    border-color: rgba(63, 111, 216, 0.6);
+    background: var(--cobalt);
+    color: #eaf1ff;
+}
+.card-action.quiet {
+    background: transparent;
+    color: var(--chalk-dim);
+    font-size: 12px;
+}
+.card-action:disabled {
+    opacity: 0.45;
+}
+
+/* A button, not a div: the whole scrim is the escape hatch. See the note at
+   the call site for why a tap is the safe signal to resume on. */
+.pause-overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    border: none;
+    background: rgba(4, 5, 14, 0.78);
+    color: inherit;
+    backdrop-filter: blur(5px);
+}
+.pause-overlay > div {
+    min-width: 210px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: rgba(13, 16, 36, 0.96);
+    padding: 24px;
+    text-align: center;
+}
+.pause-overlay strong {
+    display: block;
+    margin-top: 6px;
+    color: var(--lamp);
+    font-size: 32px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+}
+.pause-hint {
+    display: block;
+    margin-top: 14px;
+    color: var(--chalk-dim);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+}
+
+.toast {
+    position: absolute;
+    z-index: 50;
+    right: max(18px, var(--safe-right));
+    bottom: max(18px, var(--safe-bottom));
+    left: max(18px, var(--safe-left));
+    min-height: 48px;
+    border: 1px solid rgba(47, 242, 255, 0.45);
+    border-radius: var(--radius-sm);
+    background: rgba(13, 16, 36, 0.96);
+    color: var(--lamp);
+    padding: 12px 14px;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    animation: card-in 200ms ease-out;
+}
+
+/* Announced, never drawn. */
+.sr-only {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+}
+
+.fatal-error {
+    display: grid;
+    min-height: 100%;
+    place-content: center;
+    gap: 12px;
+    padding: 32px;
+    text-align: center;
+}
+.fatal-error h1,
+.fatal-error p {
+    margin: 0;
+}
+.fatal-error button {
+    min-height: 48px;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--amber);
+    color: #03222a;
+}
+
+/* --------------------------------------------------------------------------
+   Loading
+--------------------------------------------------------------------------- */
+
+.loading-screen {
+    display: flex;
+    height: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding-right: max(34px, var(--safe-right));
+    padding-left: max(34px, var(--safe-left));
+    text-align: center;
+}
+/* A 3x3 board with two flows that light cell by cell. */
+.loading-mark {
+    display: grid;
+    grid-template-columns: repeat(3, 30px);
+    gap: 4px;
+    padding: 10px;
+    border: 1px solid var(--hairline);
+    border-radius: var(--radius-sm);
+    background: rgba(6, 8, 20, 0.6);
+}
+.loading-cell {
+    width: 30px;
+    height: 30px;
+    border-radius: 7px;
+    background: rgba(150, 175, 255, 0.08);
+    animation: cell-light 2.4s ease-in-out infinite;
+}
+.loading-cell.a {
+    --lit: var(--neon-red);
+}
+.loading-cell.b {
+    --lit: var(--neon-blue);
+}
+.loading-cell.end {
+    border-radius: 50%;
+    background: var(--lit);
+    box-shadow: 0 0 10px var(--lit);
+    animation: none;
+}
+@keyframes cell-light {
+    0%,
+    100% {
+        background: rgba(150, 175, 255, 0.08);
+        box-shadow: none;
+    }
+    35%,
+    70% {
+        background: color-mix(in srgb, var(--lit) 65%, transparent);
+        box-shadow: 0 0 12px var(--lit);
+    }
+}
+.loading-title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+.loading-title strong {
+    font-family: var(--display);
+    color: var(--lamp);
+    font-size: 38px;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 22px rgba(47, 242, 255, 0.55);
+}
+.loading-title span {
+    color: var(--chalk-dim);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+}
+.loading-track {
+    width: 100%;
+    max-width: 280px;
+    height: 8px;
+    overflow: hidden;
+    border: 1px solid var(--hairline);
+    border-radius: 2px;
+    background: rgba(6, 8, 20, 0.8);
+}
+.loading-fill {
+    height: 100%;
+    min-width: 3px;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-cyan));
+    box-shadow: 0 0 10px var(--neon-cyan);
+    transition: width 220ms ease-out;
+}
+.loading-copy {
+    margin: 0;
+    color: var(--chalk-dim);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+}
+
+/* Screens fade and settle rather than cutting. The distance is deliberately
+   small — a big slide on every navigation is the kind of motion that stops
+   being charming on the fiftieth run. */
+.menu-shell,
+.subscreen,
+.loading-screen {
+    animation: screen-in 260ms ease-out;
+}
+
+@keyframes screen-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* The board arrives by powering up rather than cutting in. */
+.board-in {
+    animation: board-in 380ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes board-in {
+    from {
+        opacity: 0;
+        transform: scale(0.965);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes card-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Development-only diagnostics (removed from production by an env-gated import)
+--------------------------------------------------------------------------- */
+
+.development-tools {
+    position: absolute;
+    z-index: 100;
+    top: max(8px, var(--safe-top));
+    right: max(8px, var(--safe-right));
+    width: min(286px, calc(100% - 16px - var(--safe-left) - var(--safe-right)));
+    border: 1px solid #6b7c89;
+    border-radius: var(--radius-sm);
+    background: rgba(8, 13, 20, 0.96);
+    color: #e8edf1;
+    font:
+        700 12px / 1.35 ui-monospace,
+        monospace;
+    box-shadow: 0 12px 36px #000a;
+    touch-action: pan-y;
+}
+.development-tools button,
+.development-tools select,
+.development-tools input {
+    min-height: 44px;
+}
+.development-tools-toggle {
+    width: 100%;
+    border: 0;
+    background: #f4c95d;
+    padding: 8px 12px;
+    color: #10151f;
+    text-align: left;
+    font-weight: 900;
+}
+.development-tools-body {
+    display: grid;
+    max-height: min(68dvh, 560px);
+    gap: 8px;
+    overflow-y: auto;
+    padding: 10px;
+    overscroll-behavior: contain;
+}
+.development-tools dl {
+    display: grid;
+    gap: 3px;
+    margin: 0;
+}
+.development-tools dl > div {
+    display: grid;
+    grid-template-columns: 94px minmax(0, 1fr);
+    gap: 8px;
+}
+.development-tools dt {
+    color: #93a8b8;
+}
+.development-tools dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: #f4c95d;
+}
+.development-tools label {
+    display: grid;
+    gap: 4px;
+}
+.development-tools select,
+.development-tools input[type="range"] {
+    width: 100%;
+}
+.development-tools select,
+.development-reset {
+    border: 1px solid #596875;
+    background: #18222d;
+    padding-inline: 10px;
+    color: #e8edf1;
+}
+.development-check {
+    grid-template-columns: 1fr 44px;
+    align-items: center;
+}
+.development-check input {
+    width: 22px;
+    justify-self: center;
+}
+.development-reset {
+    font-weight: 900;
+}
+.development-tools p {
+    margin: 0;
+    color: #93a8b8;
+    font-size: 11px;
+}
+.development-safe-area {
+    position: absolute;
+    z-index: 99;
+    top: var(--safe-top);
+    right: var(--safe-right);
+    bottom: var(--safe-bottom);
+    left: var(--safe-left);
+    border: 2px dashed #f4c95d;
+    background: rgba(244, 201, 93, 0.06);
+    pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive
+--------------------------------------------------------------------------- */
+
+@media (max-height: 680px) {
+    .menu-shell {
+        gap: 10px;
+    }
+    .logo-flow {
+        font-size: 58px;
+    }
+    .logo-connect {
+        font-size: 28px;
+    }
+    .menu-subtitle {
+        display: none;
+    }
+    .menu-tile {
+        min-height: 50px;
+    }
+    .loading-mark {
+        grid-template-columns: repeat(3, 22px);
+    }
+    .loading-cell {
+        width: 22px;
+        height: 22px;
+    }
+}
+
+@media (orientation: landscape) {
+    .menu-shell,
+    .subscreen {
+        width: 100%;
+        max-width: 1180px;
+        margin-inline: auto;
+        padding-right: max(clamp(20px, 4vmin, 48px), var(--safe-right));
+        padding-left: max(clamp(20px, 4vmin, 48px), var(--safe-left));
+    }
+
+    /* Reserve the safe inset and NOTHING else. pt-safe-top/pb-safe-bottom each
+       add 8px of their own on top of it, which is fine in portrait and is pure
+       loss here: it is 16px off the short edge, and because it lands under the
+       build stamp it reads as part of the dead strip rather than as padding.
+       The remaining gap below the stamp is now exactly the inset the host
+       reports — if it still looks too tall, the host's number is the thing to
+       check (?debug=1 shows HOST SAFE next to the applied value). */
+    .menu-shell {
+        padding-top: var(--safe-top);
+        padding-bottom: var(--safe-bottom);
+        display: grid;
+        grid-template-areas:
+            "identity summary"
+            "identity play"
+            "identity daily"
+            "identity navigation"
+            "identity stamp";
+        grid-template-rows: auto auto auto auto auto;
+        grid-template-columns: minmax(200px, 0.9fr) minmax(300px, 1.1fr);
+        align-content: center;
+        column-gap: clamp(18px, 5vw, 80px);
+        row-gap: clamp(10px, 1.8dvh, 18px);
+    }
+
+    .menu-header {
+        grid-area: identity;
+        align-self: center;
+    }
+
+    .menu-subtitle {
+        max-width: 26rem;
+        margin-inline: auto;
+    }
+    .player-strip {
+        grid-area: summary;
+        /* The bottom anchor is a portrait concern; the grid places it here. */
+        margin-top: 0;
+    }
+    .play-button {
+        grid-area: play;
+    }
+    .daily-button {
+        grid-area: daily;
+    }
+    .level-grid {
+        grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+    }
+    .menu-grid {
+        grid-area: navigation;
+    }
+    .build-stamp {
+        grid-area: stamp;
+    }
+
+    .subscreen-header h2 {
+        font-size: clamp(28px, 6.6dvh, 42px);
+    }
+
+    /* One row per screen-width is a portrait shape: in landscape it strands a
+       label at one edge and its control at the other. Columns halve the height
+       and keep label and control together. The day's work is always exactly
+       three jobs, so three columns leaves no odd cell. */
+    .settings-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        column-gap: 26px;
+    }
+    .quest-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        column-gap: 12px;
+    }
+    .reward-track {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .reward-day:last-child {
+        grid-column: auto;
+    }
+    .stats-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .palette-card {
+        grid-template-columns: auto minmax(0, 1fr) auto;
+    }
+    .palette-action,
+    .palette-locked {
+        grid-column: auto;
+        min-width: 150px;
+    }
+    .results-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .run-card-body {
+        width: min(100%, 560px);
+    }
+}
+
+/* A landscape phone has roughly a third of the height a portrait one does, and
+   every sub-screen row was authored at portrait size: the header alone took a
+   fifth of the screen and barely two cards fitted under it. Everything below
+   trades vertical size for rows on screen — the type stays at readable sizes,
+   the padding and the decorative height go. */
+@media (orientation: landscape) and (max-height: 600px) {
+    .menu-subtitle {
+        display: none;
+    }
+    .menu-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    /* A phone in landscape has height to spare here but no way to spend it:
+       with fixed rows the whole control column sat as a short stack, all the
+       slack pooled under the build stamp, and since the bottom safe inset
+       lands there too the gap below was always the taller one. That asymmetry
+       is what reads as a broken screen. Fractional rows hand the slack to the
+       two control blocks instead, so the column fills the frame and the only
+       space left under the stamp is the inset itself. Taller landscape frames
+       keep the centred auto-row layout — the same rule there inflates a menu
+       tile to 130px. */
+    .menu-shell {
+        grid-template-rows: auto minmax(54px, 0.9fr) auto minmax(0, 2fr) auto;
+    }
+    .daily-button {
+        min-height: 48px;
+    }
+    .logo-flow {
+        font-size: clamp(48px, 13dvh, 72px);
+    }
+    .play-button {
+        min-height: 54px;
+        max-height: 104px;
+    }
+    .menu-grid {
+        grid-auto-rows: minmax(46px, 1fr);
+    }
+    .menu-tile {
+        min-height: 46px;
+        max-height: 88px;
+    }
+
+    .subscreen {
+        padding-top: max(8px, var(--safe-top));
+    }
+    .subscreen-header {
+        gap: 10px;
+        padding: 2px 2px 8px;
+    }
+    .subscreen-header h2 {
+        font-size: 26px;
+    }
+    .back-button {
+        width: 42px;
+        height: 42px;
+    }
+    .subscreen-content {
+        display: flex;
+        flex-direction: column;
+        padding: 12px 14px max(14px, var(--safe-bottom));
+    }
+    /* The scroll region fills the shell whether or not its content does, so a
+       screen with only a handful of rows ended in a large empty slab of card.
+       Letting the one list inside grow puts that height into the rows instead
+       of leaving it under them. Short landscape only: with more height to
+       hand out the same rule inflates a settings row to 200px. */
+    .reward-track,
+    .quest-list,
+    .stats-grid {
+        /* Grow into the spare height, never shrink below the content. */
+        flex: 1 0 auto;
+    }
+    .screen-copy {
+        margin-bottom: 12px;
+        font-size: 13px;
+    }
+
+    /* Cards: shorter, tighter, same information. */
+    .reward-day {
+        min-height: 64px;
+        padding: 8px 10px;
+    }
+    .reward-day strong {
+        font-size: 22px;
+    }
+    /* A tile that grew to fill the height should not push its number to the
+       floor — label and number stay together in the middle. */
+    .stats-grid article {
+        min-height: 68px;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 11px;
+    }
+    .stats-grid strong {
+        font-size: 22px;
+    }
+    /* Likewise for the day's work, one row of three: job and progress stay
+       together at the top and the action drops to the foot, rather than all
+       three drifting apart down an over-tall card. */
+    .quest-card {
+        display: flex;
+        flex-direction: column;
+    }
+    .quest-card progress {
+        margin-bottom: auto;
+    }
+    .quest-card button {
+        align-self: flex-start;
+    }
+    .quest-card,
+    .shop-card,
+    .palette-card {
+        padding: 9px 11px;
+    }
+    .quest-card progress {
+        margin-top: 8px;
+    }
+    .quest-card button,
+    .setting-row button,
+    .setting-row select {
+        min-height: 38px;
+    }
+    .setting-row,
+    .setting-slider {
+        min-height: 44px;
+    }
+    .claim-action,
+    .shop-card button {
+        min-height: 44px;
+        margin-top: 10px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.001ms !important;
+        animation-duration: 0.001ms !important;
+    }
+}
+
+html[data-reduced-motion="true"] *,
+html[data-reduced-motion="true"] *::before,
+html[data-reduced-motion="true"] *::after {
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+}
+
+/*
+ * Numeric readouts use tabular figures so digits share a fixed advance width.
+ * With proportional figures a score ticking 1109 -> 1110 visibly reflows and
+ * the whole counter jitters — the cheapest possible fix for a HUD that reads
+ * as unstable during play.
+ */
+.hud-stats,
+.results-grid,
+.stats-grid,
+.spark-glyph,
+[data-numeric] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+/*
+ * Hand cursor on anything clickable.
+ *
+ * A native <button> does NOT get a pointer cursor by default — browsers render
+ * the plain arrow — so it has to be asked for. Without this, desktop players
+ * get no hover affordance and the UI reads as inert. Element-selector
+ * specificity is the weakest there is, so any existing per-class `cursor` rule
+ * (including `default` or `not-allowed`) still wins.
+ */
+button:not(:disabled),
+summary,
+[role="button"]:not([aria-disabled="true"]),
+label[for] {
+    cursor: pointer;
+}

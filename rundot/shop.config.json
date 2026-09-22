@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "itemId": "flowconnect_power_pass",
+      "name": "Power Pass",
+      "description": "Permanently unlocks the Aurora, Synthwave and Prism tube sets, and removes the between-levels interstitial. Cosmetic and ad-free only — no level, hint, or reward changes.",
+      "category": "bundle",
+      "price": { "type": "bucks", "value": "399" },
+      "entitlements": [
+        { "entitlementId": "flowconnect_tube_pack_nightlife", "quantity": 1, "consumable": false },
+        { "entitlementId": "flowconnect_no_interstitials", "quantity": 1, "consumable": false },
+        { "entitlementId": "flowconnect_tubes_prism", "quantity": 1, "consumable": false }
+      ],
+      "assets": {},
+      "unique": true,
+      "active": true,
+      "regions": [],
+      "refundEligible": true,
+      "refundWindowHours": 24,
+      "tags": ["flowconnect", "founder", "cosmetic", "ad-free", "permanent"],
+      "sortOrder": 1,
+      "releasedAt": null,
+      "expiresAt": null
+    },
+    {
+      "itemId": "flowconnect_tube_pack_nightlife",
+      "name": "Tube Pack — Nightlife",
+      "description": "Permanently unlocks the Aurora and Synthwave tube sets. Cosmetic only.",
+      "category": "non_consumable",
+      "price": { "type": "bucks", "value": "199" },
+      "entitlements": [{ "entitlementId": "flowconnect_tube_pack_nightlife", "quantity": 1, "consumable": false }],
+      "assets": {},
+      "unique": true,
+      "active": true,
+      "regions": [],
+      "refundEligible": true,
+      "refundWindowHours": 24,
+      "tags": ["flowconnect", "cosmetic", "permanent"],
+      "sortOrder": 2,
+      "releasedAt": null,
+      "expiresAt": null
+    },
+    {
+      "itemId": "flowconnect_no_interstitials",
+      "name": "Ad-Free Forever",
+      "description": "Permanently removes the between-levels interstitial. Optional rewarded videos remain available and are never required.",
+      "category": "non_consumable",
+      "price": { "type": "bucks", "value": "249" },
+      "entitlements": [{ "entitlementId": "flowconnect_no_interstitials", "quantity": 1, "consumable": false }],
+      "assets": {},
+      "unique": true,
+      "active": true,
+      "regions": [],
+      "refundEligible": true,
+      "refundWindowHours": 24,
+      "tags": ["flowconnect", "ad-free", "permanent"],
+      "sortOrder": 3,
+      "releasedAt": null,
+      "expiresAt": null
+    }
+  ],
+  "sales": [],
+  "collections": []
+}
