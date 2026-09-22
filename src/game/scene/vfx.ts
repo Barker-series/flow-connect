@@ -99,6 +99,14 @@ export function createEffects(
     const glowTexture = Texture.from(bloomCanvas(128));
     let reduced = reducedMotion;
     let density = quality === "high" ? 1 : 0.45;
+    /**
+     * Hard ceiling on live sparks. A full solve fires a charge down every
+     * tube, and each charge ends in a spark burst — ten flows used to put
+     * ~90 additive sprites up in the same half-second. Past the cap a burst
+     * is thinned, never dropped: every flow still visibly lands.
+     */
+    const SPARK_BUDGET = { high: 48, low: 16 } as const;
+    let sparkBudget: number = SPARK_BUDGET[quality];
 
     function popupStyle(cssPx: number, colour: number, weight: "bold" | "900" = "900"): TextStyle {
         return new TextStyle({
@@ -114,7 +122,8 @@ export function createEffects(
 
     function addSparks(x: number, y: number, cellSize: number, colour: number, count: number): void {
         if (reduced) return;
-        const total = Math.max(2, Math.round(count * density));
+        const room = Math.max(2, sparkBudget - sparks.length);
+        const total = Math.min(room, Math.max(2, Math.round(count * density)));
         for (let i = 0; i < total; i++) {
             const sprite = new Sprite(textures.spark());
             sprite.anchor.set(0.5);
@@ -154,8 +163,10 @@ export function createEffects(
             halo.anchor.set(0.5);
             halo.blendMode = "add";
             halo.tint = colour;
-            halo.width = cellSize * 2.4;
-            halo.height = cellSize * 2.4;
+            // Big enough to read as a glow around the head, small enough that
+            // ten of them in flight do not repaint the whole board each frame.
+            halo.width = cellSize * 1.6;
+            halo.height = cellSize * 1.6;
             const head = new Sprite(textures.spark());
             head.anchor.set(0.5);
             head.blendMode = "add";
@@ -224,6 +235,7 @@ export function createEffects(
 
         setQuality(value) {
             density = value === "high" ? 1 : 0.45;
+            sparkBudget = SPARK_BUDGET[value];
         },
 
         update(dtSeconds) {
@@ -255,7 +267,7 @@ export function createEffects(
                 charge.halo.alpha = fade * 0.9;
                 if (charge.life <= 0) {
                     const end = charge.points[charge.points.length - 1] as Point;
-                    addSparks(end.x, end.y, charge.head.width / 0.9, charge.halo.tint as number, 9);
+                    addSparks(end.x, end.y, charge.head.width / 0.9, charge.halo.tint as number, 7);
                     charge.head.destroy();
                     charge.halo.destroy();
                     charges.splice(i, 1);

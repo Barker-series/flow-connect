@@ -7,7 +7,8 @@
  * the next mount.
  */
 import { Texture } from "pixi.js";
-import { orbCanvas, sparkCanvas, stageCanvas } from "./neon.ts";
+import { benchLightCanvas } from "./light.ts";
+import { context2d, orbCanvas, sparkCanvas, stageCanvas } from "./neon.ts";
 import { type PaletteId, palette, type TubePalette, tubeColour } from "./palette.ts";
 
 const ORB_PIXELS = 160;
@@ -20,8 +21,12 @@ export interface NeonTextures {
     /** An endpoint orb for flow `index`, halo included (anchor 0.5). */
     orb(flow: number): Texture;
     spark(): Texture;
-    /** The stage at the given aspect. Regenerated only when it changes. */
-    stage(width: number, height: number): Texture;
+    /**
+     * The stage at the given aspect with its lighting (key pool + vignette
+     * around `focusY`) baked in. One full-screen layer, not two: on a phone
+     * GPU every full-screen blend is a real cost.
+     */
+    stage(width: number, height: number, focusY: number): Texture;
     destroy(): void;
 }
 
@@ -45,12 +50,17 @@ export function createNeonTextures(paletteId: PaletteId): NeonTextures {
         spark() {
             return remember("spark", () => sparkCanvas(SPARK_PIXELS));
         },
-        stage(width, height) {
+        stage(width, height, focusY) {
             const aspect = Math.max(0.2, Math.min(5, height / Math.max(1, width)));
             const bucket = Math.round(aspect * 8) / 8;
+            const focus = Math.round(focusY * 20) / 20;
             const stageWidth = aspect >= 1 ? STAGE_MAX_PIXELS : Math.round(STAGE_MAX_PIXELS / bucket);
             const stageHeight = aspect >= 1 ? Math.round(STAGE_MAX_PIXELS * bucket) : STAGE_MAX_PIXELS;
-            return remember(`stage:${bucket}`, () => stageCanvas(stageWidth, stageHeight, active));
+            return remember(`stage:${bucket}:${focus}`, () => {
+                const canvas = stageCanvas(stageWidth, stageHeight, active);
+                context2d(canvas).drawImage(benchLightCanvas(stageWidth, stageHeight, focus), 0, 0);
+                return canvas;
+            });
         },
         destroy() {
             for (const texture of cache.values()) texture.destroy(true);

@@ -13,7 +13,6 @@
  * and springs back the instant the finger backs off it.
  */
 import { type Application, Container, type FederatedPointerEvent, Graphics, Rectangle, Sprite, Texture } from "pixi.js";
-import { benchLightCanvas } from "../art/light.ts";
 import { context2d, createCanvas, drawBoardBase, TUBE } from "../art/neon.ts";
 import { boost, mix, type PaletteId, palette, tubeColour } from "../art/palette.ts";
 import { createNeonTextures, type NeonTextures } from "../art/textures.ts";
@@ -67,7 +66,6 @@ export class FlowScene {
 
     private readonly root = new Container();
     private readonly stageSprite = new Sprite();
-    private readonly stageLight = new Sprite();
     /** The light the board throws on the stage, under the bezel. */
     private readonly poolLayer = new Container();
     private readonly boardBase = new Sprite();
@@ -116,7 +114,6 @@ export class FlowScene {
         this.headLayer.blendMode = "add";
         this.root.addChild(
             this.stageSprite,
-            this.stageLight,
             this.poolLayer,
             this.boardBase,
             this.tintLayer,
@@ -183,18 +180,10 @@ export class FlowScene {
 
     private applyLayout(): void {
         const { width, height, boardX, boardY, boardSize, cellSize, bezel } = this.layout;
-        this.stageSprite.texture = this.textures.stage(width, height);
+        const focusY = (boardY + boardSize / 2) / Math.max(1, height);
+        this.stageSprite.texture = this.textures.stage(width, height, focusY);
         this.stageSprite.width = width;
         this.stageSprite.height = height;
-
-        const lightPixels = 384;
-        const focusY = (boardY + boardSize / 2) / Math.max(1, height);
-        this.stageLight.texture?.destroy(true);
-        this.stageLight.texture = Texture.from(
-            benchLightCanvas(lightPixels, Math.round(lightPixels * (height / Math.max(1, width))), focusY),
-        );
-        this.stageLight.width = width;
-        this.stageLight.height = height;
 
         // The bezel and sockets, drawn once per layout at device resolution so
         // the grid lines stay crisp at any board size.
@@ -299,6 +288,11 @@ export class FlowScene {
 
         this.ambience.setBoard(this.game.occupancy(), this.game.size);
         this.drawHead();
+        // A cached (solved) board redrawn by a resize or a palette swap must
+        // re-snapshot, or it would keep showing the old size/colours.
+        if (this.boardCached) {
+            for (const layer of [this.tintLayer, this.glowLayer, this.tubeLayer]) layer.updateCacheTexture();
+        }
     }
 
     private stroke(target: Graphics, points: readonly Point[], width: number, color: number, alpha: number): void {
@@ -492,6 +486,11 @@ export class FlowScene {
     /** Every tube charges in a wave, the board flares, then the shell takes over. */
     private celebrate(): void {
         this.celebrating = true;
+        // A solved board never changes again, but its tubes are dozens of
+        // wide antialiased strokes (additive glow included) re-rasterised
+        // every frame while the celebration animates over them. Freeze the
+        // static board into one texture for as long as it stays solved.
+        this.setBoardCached(true);
         const set = palette(this.paletteId);
         const paths = this.game.livePaths();
         paths.forEach((path, flow) => {
@@ -507,9 +506,11 @@ export class FlowScene {
             x: this.layout.boardX + this.layout.boardSize / 2,
             y: this.layout.boardY + this.layout.boardSize / 2,
         };
-        for (let flow = 0; flow < this.game.flowCount; flow++) {
-            this.ambience.burst(centre.x, centre.y, this.layout.boardSize * 0.9, 3, tubeColour(set, flow));
-        }
+        // ONE bloom. It used to be one per flow, each tinted its own colour:
+        // ten board-sized additive sprites over the same pixels is exactly
+        // the overdraw that dropped frames on phones at the moment that
+        // matters most. The colour already comes from the tubes charging.
+        this.ambience.burst(centre.x, centre.y, this.layout.boardSize * 0.95, 2.5, 0xe8f4ff);
         this.callbacks.sfx("solve");
         this.callbacks.haptic("success");
         const delay = this.reducedMotion ? 350 : 950;
@@ -532,6 +533,7 @@ export class FlowScene {
 
     /** Redraw after the shell changed the game (undo, restart, hint). */
     commitExternal(result: MoveResult | null, hintedFlow = -1): void {
+        this.setBoardCached(false);
         this.cancelPointer();
         this.redraw();
         if (!result?.changed) return;
@@ -545,8 +547,19 @@ export class FlowScene {
         this.afterCommit(result);
     }
 
+    private boardCached = false;
+
+    private setBoardCached(cached: boolean): void {
+        if (this.boardCached === cached) return;
+        this.boardCached = cached;
+        for (const layer of [this.tintLayer, this.glowLayer, this.tubeLayer]) {
+            layer.cacheAsTexture(cached ? { antialias: true } : false);
+        }
+    }
+
     /** Swap in a new level without tearing down the renderer. */
     loadGame(game: FlowGame): void {
+        this.setBoardCached(false);
         this.cancelPointer();
         this.effects.clear();
         this.tweens.clear();
@@ -700,7 +713,6 @@ export class FlowScene {
         this.effects.destroy();
         this.ambience.destroy();
         this.boardBase.texture?.destroy(true);
-        this.stageLight.texture?.destroy(true);
         this.root.destroy({ children: true });
         this.textures.destroy();
     }

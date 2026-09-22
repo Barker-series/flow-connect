@@ -71,6 +71,9 @@
        surface and the tubes stay the only saturated thing on screen.
     --------------------------------------------------------------------- */
     --surface-1: rgba(150, 175, 255, 0.1);
+    /* HUD surfaces sit on the live board without a blur, so they carry their
+       own dark base instead of relying on one. */
+    --surface-hud: rgba(20, 26, 52, 0.82);
     --surface-2: rgba(150, 175, 255, 0.16);
     --surface-3: rgba(150, 175, 255, 0.24);
     --hairline: rgba(170, 195, 255, 0.16);
@@ -1191,6 +1194,12 @@ svg.gear-icon {
 /* --------------------------------------------------------------------------
    In-level HUD
 
+   No `backdrop-filter` anywhere over the board. A blurred panel over a canvas
+   that animates is re-blurred every frame — measured at ~13 ms/frame on a
+   software GPU during the solve celebration, the single largest cost there.
+   The HUD surfaces are opaque enough to read without it. (The pause overlay
+   keeps its blur: the ticker is stopped behind it, so it blurs once.)
+
    Portrait: header + stats strip inside --hud-reserve at the top, the action
    bar inside --bar-reserve at the bottom. Landscape: both stack in the right
    rail. The scene leaves exactly these reserves free, so nothing here may
@@ -1235,9 +1244,8 @@ svg.gear-icon {
     place-items: center;
     border: 1px solid var(--hairline);
     border-radius: var(--radius-sm);
-    background: var(--surface-1);
+    background: var(--surface-hud);
     color: var(--chalk);
-    backdrop-filter: blur(3px);
     box-shadow: var(--edge);
 }
 .hud-back svg {
@@ -1295,7 +1303,7 @@ svg.gear-icon {
     align-items: center;
     border: 1px solid var(--hairline);
     border-radius: var(--radius-sm);
-    background: var(--surface-1);
+    background: var(--surface-hud);
     padding: 4px 4px 5px;
 }
 .hud-stats dt {
@@ -1366,9 +1374,8 @@ svg.gear-icon {
     gap: 3px;
     border: 1px solid var(--hairline);
     border-radius: var(--radius);
-    background: var(--surface-1);
+    background: var(--surface-hud);
     color: var(--chalk);
-    backdrop-filter: blur(3px);
     box-shadow: var(--edge), var(--lift);
 }
 .action-button:active:not(:disabled) {
@@ -1492,7 +1499,6 @@ svg.gear-icon {
     place-items: center;
     padding: 24px max(20px, var(--safe-right)) max(24px, var(--safe-bottom)) max(20px, var(--safe-left));
     background: rgba(4, 5, 14, 0.66);
-    backdrop-filter: blur(4px);
     animation: card-in 220ms ease-out;
 }
 .run-card-body {
